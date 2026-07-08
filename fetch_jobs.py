@@ -6,26 +6,30 @@ from datetime import datetime
 ADZUNA_APP_ID = os.environ.get("ADZUNA_APP_ID", "689035fc")
 ADZUNA_APP_KEY = os.environ.get("ADZUNA_APP_KEY", "669316466ef294ab8acf4e7d01b8faf0")
 
-# 2. DEINE KEYWORDS NACH BEREICHEN SORTIERT
-KEYWORDS_BUSINESS = [
+# 2. DEINE KEYWORDS (Clever kombiniert, um ohne Branchenfilter maximale Treffer zu erzielen)
+KEYWORDS = [
+    # A. Raum- und Stadtentwicklung / Öffentlicher Dienst & Büros
+    '"Stadtplaner"',
+    '"Stadtentwickler"',
+    '"Stadtplanung"',
+    '"Raumplaner"',
+    
+    # B. Strategisches Management & Innovation
     '"Innovation Manager"',
     '"Strategy Consultant"',
     '"Strategic Assistant"',
     '"Business Development Manager"',
+    
+    # C. HR-Transformation & Change (SHRM)
     '"Change Manager"',
     '"Transformation Lead"',
     '"Employee Experience Manager"',
     '"Organizational Development"',
+    
+    # D. Projekt- & Prozessmanagement
     '"Senior Project Manager"',
     '"Product Owner"',
-    '"Agile Coach"',
-    '"Agile Transformation"',
-    '"Human Capital"'
-]
-
-KEYWORDS_GOVERNMENT = [
-    '"Stadtplaner"',
-    '"Stadtentwickler"'
+    '"Agile Coach"'
 ]
 
 # 3. GEOGRAFIE-FILTER (Ganz Deutschland)
@@ -33,42 +37,36 @@ ORT = "Germany"
 
 print(f"Starte API-Abfrage bei Adzuna für Ort: {ORT}...")
 all_jobs = []
-seen_job_ids = set()  # Verhindert, dass doppelte Jobs auf der Liste landen
+seen_job_ids = set()  # Verhindert doppelte Einträge
 
-def fetch_from_adzuna(keywords, categories, max_results):
-    for keyword in keywords:
-        for category in categories:
-            # Adzuna API URL für Deutschland v1
-            url = f"https://api.adzuna.com/v1/api/jobs/de/search/1"
-            params = {
-                "app_id": ADZUNA_APP_ID,
-                "app_key": ADZUNA_APP_KEY,
-                "results_per_page": max_results,
-                "what": keyword,
-                "where": ORT,
-                "category": category,
-                "content-type": "application/json"
-            }
-            try:
-                response = requests.get(url, params=params)
-                if response.status_code == 200:
-                    data = response.json()
-                    results = data.get("results", [])
-                    for job in results:
-                        job_id = job.get("id")
-                        if job_id not in seen_job_ids:
-                            seen_job_ids.add(job_id)
-                            all_jobs.append(job)
-                else:
-                    print(f"  [Fehler] Status-Code {response.status_code} für {keyword} ({category})")
-            except Exception as e:
-                print(f"  [Fehler] Verbindung fehlgeschlagen für {keyword}: {e}")
+# Der Bot durchsucht jetzt den gesamten deutschen Markt ohne einschränkende Branchen-Tags
+for keyword in KEYWORDS:
+    url = f"https://api.adzuna.com/v1/api/jobs/de/search/1"
+    params = {
+        "app_id": ADZUNA_APP_ID,
+        "app_key": ADZUNA_APP_KEY,
+        "results_per_page": 25,      # Mehr Ergebnisse pro Suchbegriff
+        "what": keyword,             # Suchbegriff
+        "where": ORT,                # Ganz Deutschland
+        "content-type": "application/json"
+    }
+    try:
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            results = data.get("results", [])
+            print(f"-> {keyword}: {len(results)} Jobs gefunden")
+            for job in results:
+                job_id = job.get("id")
+                if job_id not in seen_job_ids:
+                    seen_job_ids.add(job_id)
+                    all_jobs.append(job)
+        else:
+            print(f"  [Fehler] Status-Code {response.status_code} für {keyword}")
+    except Exception as e:
+        print(f"  [Fehler] Verbindung fehlgeschlagen für {keyword}: {e}")
 
-# --- BEIDE BEREICHE ABFRAGEN ---
-fetch_from_adzuna(KEYWORDS_BUSINESS, ["consultancy-jobs", "it-jobs", "admin-jobs"], max_results=15)
-fetch_from_adzuna(KEYWORDS_GOVERNMENT, ["admin-jobs"], max_results=20)
-
-print(f"\nFertig! {len(all_jobs)} Jobs wurden erfolgreich geladen.")
+print(f"\nFertig! Insgesamt {len(all_jobs)} eindeutige Jobs geladen.")
 
 # 4. HTML-DATEI SCHREIBEN
 html_content = f"""
