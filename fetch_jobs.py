@@ -1,7 +1,8 @@
+import os
 import requests
 from datetime import datetime
 
-# 1. HIER DEINE ADZUNA KEYS EINTRAGEN
+# 1. HIER DIE GEHEIMEN KEYS VON GITHUB ODER LOKAL LADEN
 ADZUNA_APP_ID = os.environ.get("ADZUNA_APP_ID", "689035fc")
 ADZUNA_APP_KEY = os.environ.get("ADZUNA_APP_KEY", "669316466ef294ab8acf4e7d01b8faf0")
 
