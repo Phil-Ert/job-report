@@ -2,8 +2,8 @@ import requests
 from datetime import datetime
 
 # 1. HIER DEINE ADZUNA KEYS EINTRAGEN
-ADZUNA_APP_ID = "689035fc"
-ADZUNA_APP_KEY = "669316466ef294ab8acf4e7d01b8faf0"
+ADZUNA_APP_ID = os.environ.get("ADZUNA_APP_ID", "689035fc")
+ADZUNA_APP_KEY = os.environ.get("ADZUNA_APP_KEY", "669316466ef294ab8acf4e7d01b8faf0")
 
 # 2. Deine Suchkonfiguration
 SUCHBEGRIFFE = [

@@ -26,6 +26,9 @@ jobs:
 
     - name: Job Bot ausführen
       run: python fetch_jobs.py
+      env:
+        ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+        ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
 
     - name: Ergebnisse auf GitHub Pages veröffentlichen
       uses: peaceiris/actions-gh-pages@v3
