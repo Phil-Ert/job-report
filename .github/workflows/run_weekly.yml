@@ -1,0 +1,35 @@
+name: Weekly Job Report Bot
+
+on:
+  schedule:
+    # Führt das Skript jeden Montag um 7:00 Uhr UTC (8:00 Uhr deutsche Winterzeit) aus
+    - cron: '0 7 * * 1'
+  workflow_dispatch: # Erlaubt es dir, den Bot jederzeit manuell über GitHub zu starten
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Code auschecken
+      uses: actions/checkout@v4
+
+    - name: Python einrichten
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Abhängigkeiten installieren
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Job Bot ausführen
+      run: python fetch_jobs.py
+
+    - name: Ergebnisse auf GitHub Pages veröffentlichen
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: .
+        publish_filename: index.html # Benennt job_report.html für das Web um
